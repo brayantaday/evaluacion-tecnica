@@ -10,7 +10,7 @@ import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
-import { forkJoin } from 'rxjs';
+import { finalize, forkJoin, Observable } from 'rxjs';
 import { AdminApiService, Cargo, CatalogoPayload, Departamento, Usuario, UsuarioPayload } from './admin-api.service';
 import { CatalogoFormDialogComponent } from './catalogo-form-dialog.component';
 import { UsuarioFormDialogComponent } from './usuario-form-dialog.component';
@@ -108,15 +108,13 @@ export class App {
       return;
     }
 
-    this.api.deleteUsuario(usuario.id).subscribe({
-      next: () => {
-        this.snackBar.open('Usuario eliminado correctamente.', 'Cerrar', { duration: 3000 });
-        this.loadUsuarios();
-      },
-      error: () => {
-        this.snackBar.open('No fue posible eliminar el usuario.', 'Cerrar', { duration: 3500 });
-      },
-    });
+    this.runRequestWithFeedback(
+      this.api.deleteUsuario(usuario.id),
+      'Eliminando usuario...',
+      'Usuario eliminado correctamente.',
+      'No fue posible eliminar el usuario.',
+      () => this.loadUsuarios(),
+    );
   }
 
   protected deleteDepartamento(departamento: Departamento): void {
@@ -124,15 +122,13 @@ export class App {
       return;
     }
 
-    this.api.deleteDepartamento(departamento.id).subscribe({
-      next: () => {
-        this.snackBar.open('Departamento eliminado correctamente.', 'Cerrar', { duration: 3000 });
-        this.loadData();
-      },
-      error: () => {
-        this.snackBar.open('No fue posible eliminar el departamento.', 'Cerrar', { duration: 3500 });
-      },
-    });
+    this.runRequestWithFeedback(
+      this.api.deleteDepartamento(departamento.id),
+      'Eliminando departamento...',
+      'Departamento eliminado correctamente.',
+      'No fue posible eliminar el departamento.',
+      () => this.loadData(),
+    );
   }
 
   protected deleteCargo(cargo: Cargo): void {
@@ -140,15 +136,13 @@ export class App {
       return;
     }
 
-    this.api.deleteCargo(cargo.id).subscribe({
-      next: () => {
-        this.snackBar.open('Cargo eliminado correctamente.', 'Cerrar', { duration: 3000 });
-        this.loadData();
-      },
-      error: () => {
-        this.snackBar.open('No fue posible eliminar el cargo.', 'Cerrar', { duration: 3500 });
-      },
-    });
+    this.runRequestWithFeedback(
+      this.api.deleteCargo(cargo.id),
+      'Eliminando cargo...',
+      'Cargo eliminado correctamente.',
+      'No fue posible eliminar el cargo.',
+      () => this.loadData(),
+    );
   }
 
   protected statusLabel(activo: boolean): string {
@@ -185,19 +179,13 @@ export class App {
         ? this.api.updateUsuario(usuario.id, payload)
         : this.api.createUsuario(payload);
 
-      request$.subscribe({
-        next: () => {
-          this.snackBar.open(
-            usuario ? 'Usuario actualizado correctamente.' : 'Usuario creado correctamente.',
-            'Cerrar',
-            { duration: 3000 },
-          );
-          this.loadUsuarios();
-        },
-        error: () => {
-          this.snackBar.open('No fue posible guardar el usuario.', 'Cerrar', { duration: 3500 });
-        },
-      });
+      this.runRequestWithFeedback(
+        request$,
+        usuario ? 'Guardando cambios del usuario...' : 'Creando usuario...',
+        usuario ? 'Usuario actualizado correctamente.' : 'Usuario creado correctamente.',
+        'No fue posible guardar el usuario.',
+        () => this.loadUsuarios(),
+      );
     });
   }
 
@@ -226,23 +214,37 @@ export class App {
           ? this.api.updateCargo(registro.id, payload)
           : this.api.createCargo(payload);
 
-      request$.subscribe({
-        next: () => {
-          this.snackBar.open(
-            `${tipo === 'departamento' ? 'Departamento' : 'Cargo'} ${registro ? 'actualizado' : 'creado'} correctamente.`,
-            'Cerrar',
-            { duration: 3000 },
-          );
-          this.loadData();
-        },
-        error: () => {
-          this.snackBar.open(
-            `No fue posible guardar el ${tipo === 'departamento' ? 'departamento' : 'cargo'}.`,
-            'Cerrar',
-            { duration: 3500 },
-          );
-        },
-      });
+      const entidad = tipo === 'departamento' ? 'departamento' : 'cargo';
+
+      this.runRequestWithFeedback(
+        request$,
+        registro ? `Guardando cambios del ${entidad}...` : `Creando ${entidad}...`,
+        `${tipo === 'departamento' ? 'Departamento' : 'Cargo'} ${registro ? 'actualizado' : 'creado'} correctamente.`,
+        `No fue posible guardar el ${entidad}.`,
+        () => this.loadData(),
+      );
+    });
+  }
+
+  private runRequestWithFeedback<T>(
+    request$: Observable<T>,
+    pendingMessage: string,
+    successMessage: string,
+    errorMessage: string,
+    onSuccess: () => void,
+  ): void {
+    const pendingSnackBarRef = this.snackBar.open(pendingMessage);
+
+    request$.pipe(
+      finalize(() => pendingSnackBarRef.dismiss()),
+    ).subscribe({
+      next: () => {
+        this.snackBar.open(successMessage, 'Cerrar', { duration: 3000 });
+        onSuccess();
+      },
+      error: () => {
+        this.snackBar.open(errorMessage, 'Cerrar', { duration: 3500 });
+      },
     });
   }
 
