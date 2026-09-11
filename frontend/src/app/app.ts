@@ -9,8 +9,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
 import { forkJoin } from 'rxjs';
-import { AdminApiService, Cargo, Departamento, Usuario, UsuarioPayload } from './admin-api.service';
+import { AdminApiService, Cargo, CatalogoPayload, Departamento, Usuario, UsuarioPayload } from './admin-api.service';
+import { CatalogoFormDialogComponent } from './catalogo-form-dialog.component';
 import { UsuarioFormDialogComponent } from './usuario-form-dialog.component';
 
 @Component({
@@ -26,6 +28,7 @@ import { UsuarioFormDialogComponent } from './usuario-form-dialog.component';
     MatSelectModule,
     MatSnackBarModule,
     MatTableModule,
+    MatTabsModule,
   ],
   selector: 'app-root',
   styleUrl: './app.scss',
@@ -38,6 +41,7 @@ export class App {
 
   protected readonly title = 'Administracion de usuarios';
   protected readonly displayedColumns = ['usuario', 'nombres', 'apellidos', 'departamento', 'cargo', 'acciones'];
+  protected readonly catalogColumns = ['codigo', 'nombre', 'activo', 'acciones'];
   protected readonly departamentos = signal<Departamento[]>([]);
   protected readonly cargos = signal<Cargo[]>([]);
   protected readonly usuarios = signal<Usuario[]>([]);
@@ -79,8 +83,24 @@ export class App {
     this.openUsuarioDialog();
   }
 
+  protected openCreateDepartamentoDialog(): void {
+    this.openCatalogoDialog('departamento');
+  }
+
+  protected openCreateCargoDialog(): void {
+    this.openCatalogoDialog('cargo');
+  }
+
   protected openEditDialog(usuario: Usuario): void {
     this.openUsuarioDialog(usuario);
+  }
+
+  protected openEditDepartamentoDialog(departamento: Departamento): void {
+    this.openCatalogoDialog('departamento', departamento);
+  }
+
+  protected openEditCargoDialog(cargo: Cargo): void {
+    this.openCatalogoDialog('cargo', cargo);
   }
 
   protected deleteUsuario(usuario: Usuario): void {
@@ -97,6 +117,42 @@ export class App {
         this.snackBar.open('No fue posible eliminar el usuario.', 'Cerrar', { duration: 3500 });
       },
     });
+  }
+
+  protected deleteDepartamento(departamento: Departamento): void {
+    if (!window.confirm(`Eliminar el departamento ${departamento.nombre}?`)) {
+      return;
+    }
+
+    this.api.deleteDepartamento(departamento.id).subscribe({
+      next: () => {
+        this.snackBar.open('Departamento eliminado correctamente.', 'Cerrar', { duration: 3000 });
+        this.loadData();
+      },
+      error: () => {
+        this.snackBar.open('No fue posible eliminar el departamento.', 'Cerrar', { duration: 3500 });
+      },
+    });
+  }
+
+  protected deleteCargo(cargo: Cargo): void {
+    if (!window.confirm(`Eliminar el cargo ${cargo.nombre}?`)) {
+      return;
+    }
+
+    this.api.deleteCargo(cargo.id).subscribe({
+      next: () => {
+        this.snackBar.open('Cargo eliminado correctamente.', 'Cerrar', { duration: 3000 });
+        this.loadData();
+      },
+      error: () => {
+        this.snackBar.open('No fue posible eliminar el cargo.', 'Cerrar', { duration: 3500 });
+      },
+    });
+  }
+
+  protected statusLabel(activo: boolean): string {
+    return activo ? 'Activo' : 'Inactivo';
   }
 
   protected fullName(usuario: Usuario): string {
@@ -140,6 +196,51 @@ export class App {
         },
         error: () => {
           this.snackBar.open('No fue posible guardar el usuario.', 'Cerrar', { duration: 3500 });
+        },
+      });
+    });
+  }
+
+  private openCatalogoDialog(tipo: 'departamento' | 'cargo', registro?: Departamento | Cargo): void {
+    const dialogRef = this.dialog.open(CatalogoFormDialogComponent, {
+      autoFocus: false,
+      data: {
+        entidad: tipo,
+        registro,
+      },
+      maxWidth: '96vw',
+      panelClass: 'usuario-dialog-panel',
+      width: '520px',
+    });
+
+    dialogRef.afterClosed().subscribe((payload: CatalogoPayload | undefined) => {
+      if (!payload) {
+        return;
+      }
+
+      const request$ = tipo === 'departamento'
+        ? registro
+          ? this.api.updateDepartamento(registro.id, payload)
+          : this.api.createDepartamento(payload)
+        : registro
+          ? this.api.updateCargo(registro.id, payload)
+          : this.api.createCargo(payload);
+
+      request$.subscribe({
+        next: () => {
+          this.snackBar.open(
+            `${tipo === 'departamento' ? 'Departamento' : 'Cargo'} ${registro ? 'actualizado' : 'creado'} correctamente.`,
+            'Cerrar',
+            { duration: 3000 },
+          );
+          this.loadData();
+        },
+        error: () => {
+          this.snackBar.open(
+            `No fue posible guardar el ${tipo === 'departamento' ? 'departamento' : 'cargo'}.`,
+            'Cerrar',
+            { duration: 3500 },
+          );
         },
       });
     });

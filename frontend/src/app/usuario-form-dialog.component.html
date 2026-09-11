@@ -1,42 +1,42 @@
 <div class="usuario-dialog">
   <header class="usuario-dialog__header">
-    <div>
+    <div class="usuario-dialog__title-wrap">
       <p class="usuario-dialog__eyebrow">Gestion de usuarios</p>
       <h2 mat-dialog-title>{{ isEditMode ? 'Editar usuario' : 'Crear nuevo usuario' }}</h2>
+      <p class="usuario-dialog__text">
+        Completa la informacion requerida para registrar al usuario en el directorio.
+      </p>
     </div>
-    <p class="usuario-dialog__text">
-      Completa la informacion requerida para registrar al usuario en el directorio.
-    </p>
   </header>
 
   <mat-dialog-content>
     <form class="usuario-dialog__form" [formGroup]="form">
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="usuario-dialog__field">
         <mat-label>Usuario</mat-label>
         <input matInput formControlName="usuario" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="usuario-dialog__field">
         <mat-label>Primer nombre</mat-label>
         <input matInput formControlName="primerNombre" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="usuario-dialog__field">
         <mat-label>Segundo nombre</mat-label>
         <input matInput formControlName="segundoNombre" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="usuario-dialog__field">
         <mat-label>Primer apellido</mat-label>
         <input matInput formControlName="primerApellido" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="usuario-dialog__field">
         <mat-label>Segundo apellido</mat-label>
         <input matInput formControlName="segundoApellido" />
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="usuario-dialog__field">
         <mat-label>Departamento</mat-label>
         <mat-select formControlName="idDepartamento">
           @for (departamento of data.departamentos; track departamento.id) {
@@ -45,7 +45,7 @@
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="usuario-dialog__field">
         <mat-label>Cargo</mat-label>
         <mat-select formControlName="idCargo">
           @for (cargo of data.cargos; track cargo.id) {

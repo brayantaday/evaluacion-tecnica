@@ -1,0 +1,32 @@
+<div class="catalogo-dialog">
+  <header class="catalogo-dialog__header">
+    <p class="catalogo-dialog__eyebrow">Catalogos</p>
+    <h2 mat-dialog-title>{{ isEditMode ? 'Editar ' + title : 'Nuevo ' + title }}</h2>
+    <p class="catalogo-dialog__text">
+      Completa la informacion del {{ data.entidad }} para que quede disponible en los formularios y filtros.
+    </p>
+  </header>
+
+  <mat-dialog-content>
+    <form class="catalogo-dialog__form" [formGroup]="form">
+      <mat-form-field appearance="outline">
+        <mat-label>Codigo</mat-label>
+        <input matInput formControlName="codigo" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="nombre" />
+      </mat-form-field>
+
+      <mat-slide-toggle formControlName="activo">Registro activo</mat-slide-toggle>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="catalogo-dialog__actions">
+    <button mat-button mat-dialog-close type="button">Cancelar</button>
+    <button mat-flat-button type="button" class="catalogo-dialog__submit" (click)="save()">
+      {{ isEditMode ? 'Guardar cambios' : 'Crear registro' }}
+    </button>
+  </mat-dialog-actions>
+</div>

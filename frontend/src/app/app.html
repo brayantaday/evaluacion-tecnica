@@ -22,39 +22,6 @@
   </section>
 
   <mat-card class="admin-users__shell">
-    <section class="admin-users__toolbar">
-      <div class="admin-users__filters">
-        <mat-form-field appearance="outline" class="admin-users__field">
-          <mat-label>Seleccione un Departamento</mat-label>
-          <mat-select [value]="selectedDepartamentoId()" (selectionChange)="onDepartamentoChange($event)">
-            <mat-option [value]="null">Todos los departamentos</mat-option>
-            @for (departamento of departamentos(); track departamento.id) {
-              <mat-option [value]="departamento.id">{{ departamento.nombre }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="admin-users__field">
-          <mat-label>Seleccione un Cargo</mat-label>
-          <mat-select [value]="selectedCargoId()" (selectionChange)="onCargoChange($event)">
-            <mat-option [value]="null">Todos los cargos</mat-option>
-            @for (cargo of cargos(); track cargo.id) {
-              <mat-option [value]="cargo.id">{{ cargo.nombre }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <button mat-stroked-button type="button" class="admin-users__clear" (click)="clearFilters()">
-          Limpiar filtros
-        </button>
-      </div>
-
-      <button mat-flat-button type="button" class="admin-users__create" (click)="openCreateDialog()">
-        <mat-icon class="material-symbols-outlined">person_add</mat-icon>
-        Crear nuevo usuario
-      </button>
-    </section>
-
     @if (errorMessage()) {
       <section class="admin-users__state admin-users__state--error">
         <mat-icon class="material-symbols-outlined">warning</mat-icon>
@@ -69,8 +36,43 @@
         <p>Cargando usuarios y catalogos...</p>
       </section>
     } @else {
-      <section class="admin-users__table-frame">
-        <table mat-table [dataSource]="filteredUsuarios()" class="users-table">
+      <mat-tab-group animationDuration="0ms" class="admin-users__tabs">
+        <mat-tab label="Usuarios">
+          <section class="admin-users__toolbar admin-users__toolbar--tab">
+            <div class="admin-users__filters">
+              <mat-form-field appearance="outline" class="admin-users__field">
+                <mat-label>Seleccione un Departamento</mat-label>
+                <mat-select [value]="selectedDepartamentoId()" (selectionChange)="onDepartamentoChange($event)">
+                  <mat-option [value]="null">Todos los departamentos</mat-option>
+                  @for (departamento of departamentos(); track departamento.id) {
+                    <mat-option [value]="departamento.id">{{ departamento.nombre }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="admin-users__field">
+                <mat-label>Seleccione un Cargo</mat-label>
+                <mat-select [value]="selectedCargoId()" (selectionChange)="onCargoChange($event)">
+                  <mat-option [value]="null">Todos los cargos</mat-option>
+                  @for (cargo of cargos(); track cargo.id) {
+                    <mat-option [value]="cargo.id">{{ cargo.nombre }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <button mat-stroked-button type="button" class="admin-users__clear" (click)="clearFilters()">
+                Limpiar filtros
+              </button>
+            </div>
+
+            <button mat-flat-button type="button" class="admin-users__create" (click)="openCreateDialog()">
+              <mat-icon class="material-symbols-outlined">person_add</mat-icon>
+              Crear nuevo usuario
+            </button>
+          </section>
+
+          <section class="admin-users__table-frame">
+            <table mat-table [dataSource]="filteredUsuarios()" class="users-table">
           <ng-container matColumnDef="usuario">
             <th mat-header-cell *matHeaderCellDef>Usuario</th>
             <td mat-cell *matCellDef="let usuario">
@@ -116,15 +118,121 @@
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-        </table>
+            </table>
 
-        @if (filteredUsuarios().length === 0) {
-          <div class="admin-users__empty">
-            <mat-icon class="material-symbols-outlined">group_off</mat-icon>
-            <p>No hay usuarios para los filtros seleccionados.</p>
-          </div>
-        }
-      </section>
+            @if (filteredUsuarios().length === 0) {
+              <div class="admin-users__empty">
+                <mat-icon class="material-symbols-outlined">group_off</mat-icon>
+                <p>No hay usuarios para los filtros seleccionados.</p>
+              </div>
+            }
+          </section>
+        </mat-tab>
+
+        <mat-tab label="Departamentos">
+          <section class="admin-users__toolbar admin-users__toolbar--simple">
+            <div>
+              <h3 class="admin-users__section-title">Catalogo de departamentos</h3>
+              <p class="admin-users__section-text">Administra los departamentos disponibles para filtros y formularios.</p>
+            </div>
+
+            <button mat-flat-button type="button" class="admin-users__create" (click)="openCreateDepartamentoDialog()">
+              <mat-icon class="material-symbols-outlined">add</mat-icon>
+              Nuevo departamento
+            </button>
+          </section>
+
+          <section class="admin-users__table-frame">
+            <table mat-table [dataSource]="departamentos()" class="users-table">
+              <ng-container matColumnDef="codigo">
+                <th mat-header-cell *matHeaderCellDef>Codigo</th>
+                <td mat-cell *matCellDef="let departamento"><span class="users-table__primary">{{ departamento.codigo }}</span></td>
+              </ng-container>
+
+              <ng-container matColumnDef="nombre">
+                <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                <td mat-cell *matCellDef="let departamento">{{ departamento.nombre }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="activo">
+                <th mat-header-cell *matHeaderCellDef>Estado</th>
+                <td mat-cell *matCellDef="let departamento">{{ statusLabel(departamento.activo) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let departamento">
+                  <div class="users-table__actions">
+                    <button mat-button type="button" class="users-table__action users-table__action--edit" (click)="openEditDepartamentoDialog(departamento)">
+                      <mat-icon class="material-symbols-outlined">edit_square</mat-icon>
+                      Editar
+                    </button>
+                    <button mat-button type="button" class="users-table__action users-table__action--delete" (click)="deleteDepartamento(departamento)">
+                      <mat-icon class="material-symbols-outlined">delete</mat-icon>
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="catalogColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: catalogColumns"></tr>
+            </table>
+          </section>
+        </mat-tab>
+
+        <mat-tab label="Cargos">
+          <section class="admin-users__toolbar admin-users__toolbar--simple">
+            <div>
+              <h3 class="admin-users__section-title">Catalogo de cargos</h3>
+              <p class="admin-users__section-text">Crea y edita los cargos que luego se asignan a cada usuario.</p>
+            </div>
+
+            <button mat-flat-button type="button" class="admin-users__create" (click)="openCreateCargoDialog()">
+              <mat-icon class="material-symbols-outlined">add</mat-icon>
+              Nuevo cargo
+            </button>
+          </section>
+
+          <section class="admin-users__table-frame">
+            <table mat-table [dataSource]="cargos()" class="users-table">
+              <ng-container matColumnDef="codigo">
+                <th mat-header-cell *matHeaderCellDef>Codigo</th>
+                <td mat-cell *matCellDef="let cargo"><span class="users-table__primary">{{ cargo.codigo }}</span></td>
+              </ng-container>
+
+              <ng-container matColumnDef="nombre">
+                <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                <td mat-cell *matCellDef="let cargo">{{ cargo.nombre }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="activo">
+                <th mat-header-cell *matHeaderCellDef>Estado</th>
+                <td mat-cell *matCellDef="let cargo">{{ statusLabel(cargo.activo) }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let cargo">
+                  <div class="users-table__actions">
+                    <button mat-button type="button" class="users-table__action users-table__action--edit" (click)="openEditCargoDialog(cargo)">
+                      <mat-icon class="material-symbols-outlined">edit_square</mat-icon>
+                      Editar
+                    </button>
+                    <button mat-button type="button" class="users-table__action users-table__action--delete" (click)="deleteCargo(cargo)">
+                      <mat-icon class="material-symbols-outlined">delete</mat-icon>
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="catalogColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: catalogColumns"></tr>
+            </table>
+          </section>
+        </mat-tab>
+      </mat-tab-group>
     }
   </mat-card>
 </main>
