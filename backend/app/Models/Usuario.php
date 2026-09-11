@@ -6,17 +6,18 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['codigo', 'nombre', 'activo', 'idUsuarioCreacion'])]
-class Cargo extends Model
+#[Fillable([
+    'usuario',
+    'primerNombre',
+    'segundoNombre',
+    'primerApellido',
+    'segundoApellido',
+    'idDepartamento',
+    'idCargo',
+])]
+class Usuario extends Model
 {
     use HasFactory;
 
     public $timestamps = false;
-
-    protected function casts(): array
-    {
-        return [
-            'activo' => 'boolean',
-        ];
-    }
 }
