@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
@@ -113,6 +114,7 @@ export class App {
       'Eliminando usuario...',
       'Usuario eliminado correctamente.',
       'No fue posible eliminar el usuario.',
+      () => this.loadUsuarios(),
       () => this.loadUsuarios(),
     );
   }
@@ -232,6 +234,7 @@ export class App {
     successMessage: string,
     errorMessage: string,
     onSuccess: () => void,
+    onNotFound?: () => void,
   ): void {
     const pendingSnackBarRef = this.snackBar.open(pendingMessage);
 
@@ -242,10 +245,28 @@ export class App {
         this.snackBar.open(successMessage, 'Cerrar', { duration: 3000 });
         onSuccess();
       },
-      error: () => {
-        this.snackBar.open(errorMessage, 'Cerrar', { duration: 3500 });
+      error: (error: unknown) => {
+        if (error instanceof HttpErrorResponse && error.status === 404 && onNotFound) {
+          this.snackBar.open('El registro ya no existe. La lista fue actualizada.', 'Cerrar', { duration: 3500 });
+          onNotFound();
+          return;
+        }
+
+        const backendMessage = error instanceof HttpErrorResponse
+          ? this.extractErrorMessage(error)
+          : null;
+
+        this.snackBar.open(backendMessage ?? errorMessage, 'Cerrar', { duration: 3500 });
       },
     });
+  }
+
+  private extractErrorMessage(error: HttpErrorResponse): string | null {
+    if (typeof error.error?.message === 'string' && error.error.message.trim().length > 0) {
+      return error.error.message;
+    }
+
+    return null;
   }
 
   private loadData(): void {

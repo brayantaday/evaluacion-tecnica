@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Usuario;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 
 class UsuarioController extends Controller
@@ -39,7 +40,7 @@ class UsuarioController extends Controller
         return response()->json($usuario->fresh()->load(['departamento', 'cargo']));
     }
 
-    public function destroy(Usuario $usuario): JsonResponse
+    public function destroy(Usuario $usuario): Response
     {
         $usuario->delete();
 

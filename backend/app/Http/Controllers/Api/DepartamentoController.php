@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Departamento;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 
 class DepartamentoController extends Controller
@@ -34,8 +35,14 @@ class DepartamentoController extends Controller
         return response()->json($departamento->fresh());
     }
 
-    public function destroy(Departamento $departamento): JsonResponse
+    public function destroy(Departamento $departamento): JsonResponse|Response
     {
+        if ($departamento->usuarios()->exists()) {
+            return response()->json([
+                'message' => 'No se puede eliminar el departamento porque tiene usuarios asociados.',
+            ], 409);
+        }
+
         $departamento->delete();
 
         return response()->noContent();

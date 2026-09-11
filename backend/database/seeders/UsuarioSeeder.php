@@ -14,15 +14,44 @@ class UsuarioSeeder extends Seeder
      */
     public function run(): void
     {
-        Usuario::updateOrCreate([
-            'usuario' => 'jlopez',
-        ], [
-            'primerNombre' => 'Juan',
-            'segundoNombre' => 'Carlos',
-            'primerApellido' => 'Lopez',
-            'segundoApellido' => 'Martinez',
-            'idDepartamento' => Departamento::query()->value('id') ?? 1,
-            'idCargo' => Cargo::query()->value('id') ?? 1,
-        ]);
+        $departamentoId = Departamento::query()->value('id') ?? 1;
+        $cargoId = Cargo::query()->value('id') ?? 1;
+
+        $usuarios = [
+            [
+                'usuario' => 'jlopez',
+                'primerNombre' => 'Juan',
+                'segundoNombre' => 'Carlos',
+                'primerApellido' => 'Lopez',
+                'segundoApellido' => 'Martinez',
+                'idDepartamento' => $departamentoId,
+                'idCargo' => $cargoId,
+            ],
+            [
+                'usuario' => 'mperez',
+                'primerNombre' => 'Maria',
+                'segundoNombre' => 'Elena',
+                'primerApellido' => 'Perez',
+                'segundoApellido' => 'Gomez',
+                'idDepartamento' => $departamentoId,
+                'idCargo' => $cargoId,
+            ],
+            [
+                'usuario' => 'arodriguez',
+                'primerNombre' => 'Andres',
+                'segundoNombre' => 'Felipe',
+                'primerApellido' => 'Rodriguez',
+                'segundoApellido' => 'Suarez',
+                'idDepartamento' => $departamentoId,
+                'idCargo' => $cargoId,
+            ],
+        ];
+
+        foreach ($usuarios as $usuario) {
+            Usuario::updateOrCreate(
+                ['usuario' => $usuario['usuario']],
+                $usuario,
+            );
+        }
     }
 }

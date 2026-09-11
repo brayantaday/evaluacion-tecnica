@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Cargo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 
 class CargoController extends Controller
@@ -34,8 +35,14 @@ class CargoController extends Controller
         return response()->json($cargo->fresh());
     }
 
-    public function destroy(Cargo $cargo): JsonResponse
+    public function destroy(Cargo $cargo): JsonResponse|Response
     {
+        if ($cargo->usuarios()->exists()) {
+            return response()->json([
+                'message' => 'No se puede eliminar el cargo porque tiene usuarios asociados.',
+            ], 409);
+        }
+
         $cargo->delete();
 
         return response()->noContent();
