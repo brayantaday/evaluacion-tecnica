@@ -1,0 +1,65 @@
+<div class="usuario-dialog">
+  <header class="usuario-dialog__header">
+    <div>
+      <p class="usuario-dialog__eyebrow">Gestion de usuarios</p>
+      <h2 mat-dialog-title>{{ isEditMode ? 'Editar usuario' : 'Crear nuevo usuario' }}</h2>
+    </div>
+    <p class="usuario-dialog__text">
+      Completa la informacion requerida para registrar al usuario en el directorio.
+    </p>
+  </header>
+
+  <mat-dialog-content>
+    <form class="usuario-dialog__form" [formGroup]="form">
+      <mat-form-field appearance="outline">
+        <mat-label>Usuario</mat-label>
+        <input matInput formControlName="usuario" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Primer nombre</mat-label>
+        <input matInput formControlName="primerNombre" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Segundo nombre</mat-label>
+        <input matInput formControlName="segundoNombre" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Primer apellido</mat-label>
+        <input matInput formControlName="primerApellido" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Segundo apellido</mat-label>
+        <input matInput formControlName="segundoApellido" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Departamento</mat-label>
+        <mat-select formControlName="idDepartamento">
+          @for (departamento of data.departamentos; track departamento.id) {
+            <mat-option [value]="departamento.id">{{ departamento.nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Cargo</mat-label>
+        <mat-select formControlName="idCargo">
+          @for (cargo of data.cargos; track cargo.id) {
+            <mat-option [value]="cargo.id">{{ cargo.nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="usuario-dialog__actions">
+    <button mat-button mat-dialog-close type="button">Cancelar</button>
+    <button mat-flat-button type="button" class="usuario-dialog__submit" (click)="save()">
+      {{ isEditMode ? 'Guardar cambios' : 'Crear usuario' }}
+    </button>
+  </mat-dialog-actions>
+</div>
